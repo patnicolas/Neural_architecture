@@ -2,15 +2,11 @@
 
 The objective is the design of reusable neural block in PyTorch to be assembled to produce complex network architectures.
 
-
-
-
-
-This post illustrates the automation of creating deep convolutional generative adversarial networks (DCGAN) by inferring the configuration of generator from the discriminator. We will use the ubiquituous real vs. fake images detection scenario for our GAN model. 
+The automation of creating deep convolutional generative adversarial networks (DCGAN) by inferring the configuration of generator from the discriminator. We will use the ubiquituous real vs. fake images detection scenario for our GAN model. 
 
 This post does not dwell in details into generative adversarial networks or convolutional networks. It focuses on automating the configuration of some of their components. It is assumed the reader has some basic understanding of convolutional neural networks and Pytorch library.
 
-The challenge
+# The challenge
 For those not familiar with GANs..... 
 GANs are unsupervised learning models that discover patterns in data and use those patterns to generate new samples (data augmentation) that are almost indistinguishable from the original data. GANs are part of the generative models family along with variational auto-encoders or MLE. The approach reframes the problem as a supervised learning problem using two adversarial networks:
 Generator model trained to generate new samples
@@ -20,26 +16,26 @@ Please refer to the reference section to learn more about generative adversarial
 Designing and configuring the generator and discriminator of a generative adversarial networks (GAN) or the encoder and decoder layers of a variational convolutional auto-encoders (VAE) can be a very tedious and repetitive task. 
 Actually some of the steps can be fully automated knowing that the generative network of the convolutional GAN for example can be configured as the mirror (or inversion) of the discriminator using a de-convolutional network. The same automation technique applies to the instantiation of a decoder of a VAE given an encoder.
 
-Functional representation of a simple deep convolutional GAN
-
+# Functional representation of a simple deep convolutional GAN
 
 Neural component reusability is key to generate a de-convolutional network from a convolutional network. To this purpose we break down a neural network into computational blocks.
 
-Convolutional neural blocks
+## Convolutional neural blocks
 At the highest level, a generative adversarial network is composed of at least two neural networks: A generator and a discriminator.
 These two neural networks can be broken down into neural block or group of PyTorch modules: hidden layer, batch normalization, regularization, pooling mode and activation function. Let's consider a discriminator built using a convolutional neural network followed by a fully connected (restricted Boltzmann machine) network. The PyTorch modules associated with any given layer are assembled as a neural block class.
+
 A PyTorch modules of the convolutional neural block are:
-Conv2d: Convolutional layer with input, output channels, kernel, stride and padding
-Dropout: Drop-out regularization layer
-BatchNorm2d: Batch normalization module
-MaxPool2d Pooling layer
-ReLu, Sigmoid, ... Activation functions
+- **Conv2d**: Convolutional layer with input, output channels, kernel, stride and padding
+- **BatchNorm2d**: Batch normalization module
+- **MaxPool2d** Pooling layer
+- **ReLu**, **Sigmoid**, ... Activation functions
 
 
-Representation of a convolutional neural block
+## Representation of a convolutional neural block
 
 The constructor for the neural block initializes all its parameters and its modules in the proper oder. For the sake of simplicity, regularization elements such as drop-out (bagging of sub-network) is omitted.
 
+```
 class ConvNeuralBlock(nn.Module):
   def __init__(self,
       in_channels: int,
@@ -54,16 +50,15 @@ class ConvNeuralBlock(nn.Module):
       is_spectral: bool = False):
     
    super(ConvNeuralBlock, self).__init__()
-        
-   # Assertions are omitted
-   # 1- initialize the input and output channels
+
+   Initialize the input and output channels
    self.in_channels = in_channels
    self.out_channels = out_channels
    self.is_spectral = is_spectral
    modules = []
    
-   # 2- create a 2 dimension convolution layer
-   conv_module = nn.Conv2d(   
+   # Create a 2 dimension convolution layer
+   conv_module = nn.Conv2d(  # 
        self.in_channels,
        self.out_channels,
        kernel_size=kernel_size,
@@ -71,33 +66,33 @@ class ConvNeuralBlock(nn.Module):
        padding=padding,
        bias=bias)
 
-   # 6- if this is a spectral norm block
+   # If this is a spectral norm block
    if self.is_spectral:        
      conv_module = nn.utils.spectral_norm(conv_module)
      modules.append(conv_module)
         
-   # 3- Batch normalization
+   # Batch normalization
    if batch_norm:               
      modules.append(nn.BatchNorm2d(self.out_channels))
      
-   # 4- Activation function
+   # Activation function
    if activation is not None: 
      modules.append(activation)
         
-   # 5- Pooling module
-   if max_pooling_kernel > 0:   
+   if max_pooling_kernel > 0:  # Pooling module
      modules.append(nn.MaxPool2d(max_pooling_kernel))
    
    self.modules = tuple(modules)
+```
 
 We considering the case of a generative model for images. The first step (1) is to initialize the number of input and output channels, then create the 2-dimension convolution (2), a batch normalization module (3) an activation function (4) and finally a Max  pooling module (5). The spectral norm regularization (6) is optional.
 The convolutional neural network is assembled from convolutional and feedback forward neural blocks, in the following build method.
 
-class ConvModel(NeuralModel):
+```
+`class ConvModel(NeuralModel):
   def __init__(self,                    
        model_id: str,
-       # 1 Number of input and output unites
-       input_size: int,
+       input_size: int,  # 1 Number of input and output units
        output_size: int,
        # 2- PyTorch convolutional modules
        conv_model: nn.Sequential,
@@ -118,18 +113,16 @@ class ConvModel(NeuralModel):
       conv_neural_blocks: list,  
       dff_neural_blocks: list) -> NeuralModel:
             
-   # 4- Initialize the input and output size 
-   # for the convolutional layer
+     # Initialize the input and output size for the convolutional layer
    input_size = conv_neural_blocks[0].in_channels
    output_size = conv_neural_blocks[len(conv_neural_blocks) - 1].out_channels
 
-   # 5- Generate the model from the sequence 
-   # of conv. neural blocks
+     # 4 Generate the model from the sequence of conv. neural blocks
    conv_modules = [conv_module for conv_block in conv_neural_blocks
          for conv_module in conv_block.modules]
    conv_model = nn.Sequential(*conv_modules)
 
-   # 6- If a fully connected RBM is included in the model ..
+     # 6 If a fully connected RBM is included in the model ..
    if dff_neural_blocks is not None and not is_vae:
      dff_modules = [dff_module for dff_block in dff_neural_blocks
         for dff_module in dff_block.modules]
@@ -148,25 +141,26 @@ class ConvModel(NeuralModel):
      conv_model,
      dff_model_input_size, 
      dff_model)
+ ```
 
 The default constructor (1) initializes the number of input/output channels, the PyTorch modules for the convolutional layers (2) and the fully connected layers (3).
 The class method, build, instantiate the convolutional model from the convolutional neural blocks and feed forward neural blocks. It initializes the size of input and output layers from the first and last neural blocks (4), generate the PyTorch convolutional modules (5) and fully-connected layers modules (6) from the neural blocks.
 Next we build the de-convolutional neural network from the convolutional blocks.
 
-Inverting a convolutional block
+## Inverting a convolutional block
 The process to build a GAN is as follow:
-Specify components (PyTorch modules) for each convolutional layer 
-Assemble these modules into a convolutional neural block
-Create a generator and discriminator network by aggregating the blocks
-Wire the generator and discriminator to product a fully functional GAN
-The goal is create a builder for generating the de-convolutional network implementing the GAN generator from the convolutional network defined in the previous section. 
-The first step is to extract the de-convolutional block from an existing convolutional block
+1. Specify components (PyTorch modules) for each convolutional layer 
+2. Assemble these modules into a convolutional neural block
+3. Create a generator and discriminator network by aggregating the blocks
+4. Wire the generator and discriminator to product a fully functional GAN
+5. The goal is create a builder for generating the de-convolutional network implementing the GAN generator from the convolutional network defined in the previous section. 
+6. The first step is to extract the de-convolutional block from an existing convolutional block
 
 
-Conceptual conversion of a convolutional block into a de-convolutional block
-
+# Conceptual conversion of a convolutional block into a de-convolutional block
 The default constructor for the neural block of a de-convolutional network defines all the key parameters used in the network except the pooling module (not needed). The following code snippet illustrates the instantiation of a De convolutional neural block using the convolution parameters such as number of input, output channels, kernel size, stride and passing, batch normalization and activation function. 
 
+```
 class DeConvNeuralBlock(nn.Module):
   def __init__(self,
        in_channels: int,
@@ -199,43 +193,12 @@ class DeConvNeuralBlock(nn.Module):
    # Add activation
    modules.append(activation)
    self.modules = modules
+```
 
 Note that the de-convolution block does have any pooling capabilities
 The class method, auto_build, takes a convolutional neural block, number of input and output channels and an optional activation function to generate a de-convolutional neural block of type DeConvNeuralBlock. The number of input and output channels in the output deconvolution layer is computed in the private method __resize
 
- 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
+```
 @classmethod
 def auto_build(cls,
     conv_block: ConvNeuralBlock,
@@ -269,10 +232,12 @@ def auto_build(cls,
         batch_norm,
         activation,
         False)
+```
 
-Sizing de-convolutional layers
+## Sizing de-convolutional layers
 The next task consists of computing the size of the component of the de-convolutional block from the original convolutional block. 
 
+```
 @staticmethod
 def __resize(
   conv_block: ConvNeuralBlock,
@@ -294,11 +259,13 @@ def __resize(
     padding = conv_modules[0].padding
 
  return kernel_size, stride, padding, batch_norm, activation
+```
 
-The __resize method extracts the PyTorch modules for the de-convolutional layers from the original convolutional block (1), adds the activation function to the block (2) and finally initialize the parameters of the de-convolutional (3).
+The **__resize** method extracts the PyTorch modules for the de-convolutional layers from the original convolutional block (1), adds the activation function to the block (2) and finally initialize the parameters of the de-convolutional (3).
 
-The helper method,  __de_conf_modules, extracts the PyTorch modules related to the convolutional layer, batch normalization module and activation function for the de-convolution from the PyTorch modules of the convolution.
+The helper method,  **__de_conf_modules**, extracts the PyTorch modules related to the convolutional layer, batch normalization module and activation function for the de-convolution from the PyTorch modules of the convolution.
 
+```
 @staticmethod
 def __de_conv_modules(conv_modules: list) -> \
         (torch.nn.Module, torch.nn.Module, torch.nn.Module):
@@ -316,23 +283,16 @@ def __de_conv_modules(conv_modules: list) -> \
     elif DeConvNeuralBlock.__is_activation(conv_module):
        activation_function = conv_module
   return deconv_layer, batch_norm_module, activation_function
-
-and the height of the two dimension output data is
-
+```
 
 
-
-De-convolutional layers
+## De-convolutional layers
 As expected, the formula to computed the size of the output of a de-convolutional layer is the mirror image of the formula for the output size of the convolutional layer.
 
-
-and
-
-
-
-Assembling the de-convolutional network
+## Assembling the de-convolutional network
 Finally, de-convolutional model, of type DeConvModel  is created using the sequence of PyTorch module, de_conv_model. Once again, the default constructor (1) initializes the size of the input layer (2) and output layer (3) and load the PyTorch modules, de_conv_modules, for all de-convolutional layers.
 
+```
 class DeConvModel(NeuralModel, ConvSizeParams):
   def __init__(self,            # 1 - Default constructor
            model_id: str,
@@ -394,36 +354,36 @@ class DeConvModel(NeuralModel, ConvSizeParams):
      
    del de_conv_neural_blocks
    return de_conv_model
+```
 
 The alternate constructor, build, creates and configures the de-convolutional model from the convolutional blocks conv_neural_blocks (4). 
 The order of the de-convolutional layers requires the list of convolutional blocks to be reversed (5).  For each block of the convolutional network (6), the method updates the number of input channels from the number of input channels of the first layer (7).
 The method updates the activation function for the output layer (8) and weaves the de-convolutional blocks (9)
 Finally, the de-convolutional neural network is assembled from these blocks (10).
 
+```
 @classmethod
 def assemble(cls, model_id: str, de_conv_neural_blocks: list):
     input_size = de_conv_neural_blocks[0].in_channels
     output_size = de_conv_neural_blocks[len(de_conv_neural_blocks) - 1].out_channels
-    # 11- Generate the PyTorch convolutional modules used by the default constructor
+   
+   # 11- Generate the PyTorch convolutional modules used by the default constructor
     conv_modules = tuple([conv_module for conv_block in de_conv_neural_blocks
                           for conv_module in conv_block.modules 
                           if conv_module is not None])
     de_conv_model = torch.nn.Sequential(*conv_modules)
     return cls(model_id, input_size, output_size, de_conv_model)
+```
 
-The assemble method constructs the final de-convolutional neural network from the blocks   de_conv_neural_blocks by aggregating the PyTorch modules associated with each block (11).
+The **assemble** method constructs the final de-convolutional neural network from the blocks **de_conv_neural_blocks** by aggregating the PyTorch modules associated with each block (11).
 
-Environment
-Python 3.8
-PyTorch 1.7.2
+# Environment
+- Python 3.8
+- PyTorch 1.7.2
 
-References
-A Gentle Introduction to Generative Adversarial Networks
-Deep learning Chap 9 Convolutional networks - I. Goodfellow, Y. Bengio, A. Courville - 2017 - MIT Press Cambridge MA 
-PyTorch
-Tutorial: DCGAN in PyTorch
-
-
-
-Reference: http://patricknicolas.blogspot/2021/09/automating-configuration-of-gan-in.html
+ #References
+- A Gentle Introduction to Generative Adversarial Networks https://machinelearningmastery.com/what-are-generative-adversarial-networks-gans/
+- Deep learning Chap 9 Convolutional networks - I. Goodfellow, Y. Bengio, A. Courville - 2017 - MIT Press Cambridge MA 
+- PyTorch www.pytorch.org
+- Tutorial: DCGAN in PyTorch
 
