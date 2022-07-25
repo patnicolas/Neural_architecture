@@ -155,7 +155,7 @@ The process to build a GAN is as follow:
 6. The first step is to extract the de-convolutional block from an existing convolutional block
 
 
-# Conceptual conversion of a convolutional block into a de-convolutional block
+## Auto-generation of de-convolutional block from a convolutional block
 The default constructor for the neural block of a de-convolutional network defines all the key parameters used in the network except the pooling module (not needed). The following code snippet illustrates the instantiation of a De convolutional neural block using the convolution parameters such as number of input, output channels, kernel size, stride and passing, batch normalization and activation function. 
 
 ```
