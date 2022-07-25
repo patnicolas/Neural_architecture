@@ -17,12 +17,11 @@ Designing and configuring the generator and discriminator of a generative advers
 Actually some of the steps can be fully automated knowing that the generative network of the convolutional GAN for example can be configured as the mirror (or inversion) of the discriminator using a de-convolutional network. The same automation technique applies to the instantiation of a decoder of a VAE given an encoder.
 
 # Functional representation of a simple deep convolutional GAN
-
-Neural component reusability is key to generate a de-convolutional network from a convolutional network. To this purpose we break down a neural network into computational blocks.
+Neural component reusability is key to generate a de-convolutional network from a convolutional network. To this purpose we **break down** a neural network into computational blocks.
 
 ## Convolutional neural blocks
 At the highest level, a generative adversarial network is composed of at least two neural networks: A generator and a discriminator.
-These two neural networks can be broken down into neural block or group of PyTorch modules: hidden layer, batch normalization, regularization, pooling mode and activation function. Let's consider a discriminator built using a convolutional neural network followed by a fully connected (restricted Boltzmann machine) network. The PyTorch modules associated with any given layer are assembled as a neural block class.
+These two neural networks can be broken down into neural block or group of PyTorch modules: *hidden layer, batch normalization, regularization, pooling mode and activation function*. Let's consider a discriminator built using a convolutional neural network followed by a fully connected (restricted Boltzmann machine) network. The PyTorch modules associated with any given layer are assembled as a neural block class.
 
 A PyTorch modules of the convolutional neural block are:
 - **Conv2d**: Convolutional layer with input, output channels, kernel, stride and padding
@@ -32,7 +31,6 @@ A PyTorch modules of the convolutional neural block are:
 
 
 ## Representation of a convolutional neural block
-
 The constructor for the neural block initializes all its parameters and its modules in the proper oder. For the sake of simplicity, regularization elements such as drop-out (bagging of sub-network) is omitted.
 
 ```
@@ -143,8 +141,8 @@ The convolutional neural network is assembled from convolutional and feedback fo
      dff_model)
  ```
 
-The default constructor (1) initializes the number of input/output channels, the PyTorch modules for the convolutional layers (2) and the fully connected layers (3).
-The class method, build, instantiate the convolutional model from the convolutional neural blocks and feed forward neural blocks. It initializes the size of input and output layers from the first and last neural blocks (4), generate the PyTorch convolutional modules (5) and fully-connected layers modules (6) from the neural blocks.
+The default **constructor** (1) initializes the number of input/output channels, the PyTorch modules for the convolutional layers (2) and the fully connected layers (3).
+The class method, **build**, instantiate the convolutional model from the convolutional neural blocks and feed forward neural blocks. It initializes the size of input and output layers from the first and last neural blocks (4), generate the PyTorch convolutional modules (5) and fully-connected layers modules (6) from the neural blocks.
 Next we build the de-convolutional neural network from the convolutional blocks.
 
 ## Inverting a convolutional block
@@ -194,9 +192,9 @@ class DeConvNeuralBlock(nn.Module):
    modules.append(activation)
    self.modules = modules
 ```
+*Note* that the de-convolution block does have any pooling capabilities
 
-Note that the de-convolution block does have any pooling capabilities
-The class method, auto_build, takes a convolutional neural block, number of input and output channels and an optional activation function to generate a de-convolutional neural block of type DeConvNeuralBlock. The number of input and output channels in the output deconvolution layer is computed in the private method __resize
+The class method, **auto_build**, takes a convolutional neural block, number of input and output channels and an optional activation function to generate a de-convolutional neural block of type **DeConvNeuralBlock**. The number of input and output channels in the output deconvolution layer is computed in the private method __resize
 
 ```
 @classmethod
@@ -290,7 +288,7 @@ def __de_conv_modules(conv_modules: list) -> \
 As expected, the formula to computed the size of the output of a de-convolutional layer is the mirror image of the formula for the output size of the convolutional layer.
 
 ## Assembling the de-convolutional network
-Finally, de-convolutional model, of type DeConvModel  is created using the sequence of PyTorch module, de_conv_model. Once again, the default constructor (1) initializes the size of the input layer (2) and output layer (3) and load the PyTorch modules, de_conv_modules, for all de-convolutional layers.
+Finally, de-convolutional model, of type **DeConvModel**  is created using the sequence of PyTorch module, **de_conv_model**. Once again, the default constructor (1) initializes the size of the input layer (2) and output layer (3) and load the PyTorch modules, de_conv_modules, for all de-convolutional layers.
 
 ```
 class DeConvModel(NeuralModel, ConvSizeParams):
@@ -356,7 +354,7 @@ class DeConvModel(NeuralModel, ConvSizeParams):
    return de_conv_model
 ```
 
-The alternate constructor, build, creates and configures the de-convolutional model from the convolutional blocks conv_neural_blocks (4). 
+The alternate constructor, build, creates and configures the de-convolutional model from the convolutional blocks **conv_neural_blocks** (4). 
 The order of the de-convolutional layers requires the list of convolutional blocks to be reversed (5).  For each block of the convolutional network (6), the method updates the number of input channels from the number of input channels of the first layer (7).
 The method updates the activation function for the output layer (8) and weaves the de-convolutional blocks (9)
 Finally, the de-convolutional neural network is assembled from these blocks (10).
