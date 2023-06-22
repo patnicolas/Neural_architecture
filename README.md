@@ -1,4 +1,6 @@
-# Network Architecture Componentization - April 2022
+### Patrick Nicolas - Last update 08.23.2022 v0.3
+
+![Banner](images/NeuralArchitecture.jpeg)
 
 The objective is the design of reusable neural block in PyTorch to be assembled to produce complex network architectures.
 
