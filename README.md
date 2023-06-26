@@ -2,6 +2,12 @@
 
 ![Banner](images/NeuralArchitecture.jpeg)
 
+**References**: 
+-[Deep learning with reusable neural blocks](http://patricknicolas.blogspot.com/2023/03/building-bert-with-reusable-neural.html)
+-[Automating the configuration of a GAN in PyTorch](http://patricknicolas.blogspot.com/2021/09/automating-configuration-of-gan-in.html)
+
+
+
 The objective is the design of reusable neural block in PyTorch to be assembled to produce complex network architectures.
 
 The automation of creating deep convolutional generative adversarial networks (DCGAN) by inferring the configuration of generator from the discriminator. We will use the ubiquituous real vs. fake images detection scenario for our GAN model. 
