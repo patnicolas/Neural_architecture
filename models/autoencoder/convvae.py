@@ -60,13 +60,13 @@ class ConvVAE(VAE):
             return VAE.compute_loss(reconstruction_loss, mu, log_var, sz)
         except RuntimeError as e:
             constants.log_error(f'Runtime error {str(e)}')
-            return None
+            return -1.0
         except ValueError as e:
             constants.log_error(f'Value error {str(e)}')
-            return None
+            return -1.0
         except KeyError as e:
             constants.log_error(f'Key error {str(e)}')
-            return None
+            return -1.0
 
 
 

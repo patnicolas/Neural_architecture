@@ -1,0 +1,20 @@
+{
+  "version":"0.1",
+  "date": "05-18-2021",
+  "commit":"prototype",
+  "s3_config": {
+      "region":"us-east-2",
+      "access_key":"AKIAQVWRM24MPWIAYWR7",
+      "secret_key":"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",
+      "bucket_name":"aideo-tech-autocoding-v1",
+      "url_prefix":"https://s3-us-east-2.amazonaws.com"
+    },
+  "s3_sources": {
+    "covariance": "dl/covariance",
+    "text_terms": "dl/termcontext",
+    "terms_context_claim":"dl/termscontextclaim",
+    "terms_features": "dl/termscontextfeatures/"
+  },
+  "log_level": "DEBUG",
+  "is_print_to_log":false
+}
