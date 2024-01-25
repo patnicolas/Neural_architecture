@@ -1,10 +1,11 @@
-
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2020, 2023  All rights reserved."
 
 import torch
 from architecture.architecturemodel import ArchitectureModel
 from architecture.searchmethod import SearchMethod
 from torch import nn
-from torch.autograd import Variable
+
 
 """
     Search using Gradient descent

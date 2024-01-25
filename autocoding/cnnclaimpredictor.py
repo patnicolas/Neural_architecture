@@ -1,3 +1,5 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2020, 2023  All rights reserved."
 
 import torch
 from models.cnn.convnet import ConvNet

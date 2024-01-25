@@ -1,4 +1,5 @@
-
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2020, 2023  All rights reserved."
 
 from torch import nn
 from architecture.architecturemodel import ArchitectureModel

@@ -1,4 +1,5 @@
-
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2020, 2023  All rights reserved."
 import numpy as np
 import math
 
@@ -12,7 +13,6 @@ import math
     :param lower_bound: Minimum value this parameter may have
     :param upper_bound: Maximum value this parameter may have
 """
-
 
 class TuningParam(object):
     def __init__(self, param_name: str, param_type: str, to_normalize: bool, lower_bound: float, upper_bound: float):

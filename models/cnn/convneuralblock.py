@@ -70,15 +70,11 @@ class ConvNeuralBlock(nn.Module):
                              activation,
                              bias)
 
-
     def __repr__(self) -> str:
         return ' '.join([f'\n{str(module)}' for module in self.modules])
 
-
     def get_modules(self):
         return self.modules
-
-
     def get_modules_weights(self) -> tuple:
         """
             Get the weights for modules which contains them
@@ -127,7 +123,6 @@ class ConvNeuralBlock(nn.Module):
         if max_pooling_kernel > 0:
             modules.append(nn.MaxPool1d(max_pooling_kernel))
         return modules
-
 
     def init2d(self,
                kernel_size: int,
