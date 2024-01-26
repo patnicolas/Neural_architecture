@@ -1,10 +1,9 @@
 __author__ = "Patrick Nicolas"
-__copyright__ = "Copyright 2020, 2022  All rights reserved."
+__copyright__ = "Copyright 2020, 2024  All rights reserved."
 
 import numpy as np
 import math
 from scipy import stats
-
 
 
 class MetropolisHastings(object):

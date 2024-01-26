@@ -50,7 +50,7 @@ class ArchitectureModel(nn.Module):
         default_s3_bucket_name = constants.s3_config['bucket_name']
         s3_util = S3Util(default_s3_bucket_name, s3_folder_name, True, 20)
         config_dict = s3_util.s3_to_list('json')
-        kafka_params = config_dict[0]['kafka']
+        kafka_params = config_dict[0]['kafka_connect']
         spark_params = config_dict[0]['spark']
 
         tuning_features = TuningFeatures()

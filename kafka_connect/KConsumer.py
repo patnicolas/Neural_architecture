@@ -1,17 +1,19 @@
+__author__ = "Patrick Nicolas"
+__copyright__ = "Copyright 2020, 2022  All rights reserved."
+
 from abc import abstractmethod
-from confluent_kafka import Consumer
-from confluent_kafka import KafkaError
-from confluent_kafka import KafkaException
+from kafka import KafkaConsumer
+from kafka.errors import KafkaError
 import sys
 
 
-class KafkaConsumer(object):
+class KConsumer(object):
     MIN_COMMIT_COUNT = 128
 
     def __init__(self, kafka_consumer_prop: dict, topic: str, polling_interval_ms: int):
         assert(20 < polling_interval_ms < 8096, f'Polling interval {polling_interval_ms} is out of range ]20, 8096[')
-        self.consumer = Consumer(kafka_consumer_prop)
-        self.consumer.subscribe(topic)
+        self.consumer = KafkaConsumer(topic, group_id='group-1', bootstrap_servers=['localhost:9092'])
+        self.consumer.subscribe([topic])
         self.polling_interval_ms = polling_interval_ms
         self.running = True
 
@@ -28,7 +30,7 @@ class KafkaConsumer(object):
         return cls(kafka_consumer_prop, topic, polling_interval_ms)
 
     @classmethod
-    def build(cls, s3_bucket: str, s3_property_file: str, is_property_file_valid: bool) -> object:
+    def auto_build(cls, s3_bucket: str, s3_property_file: str, is_property_file_valid: bool) -> object:
         """
         Alternative constructor using an existing property file
         :param s3_bucket: Name of S3 bucket
@@ -40,7 +42,6 @@ class KafkaConsumer(object):
         kafka_consumer_prop, topic, polling_interval_ms = load(s3_bucket, s3_property_file)
         return cls(kafka_consumer_prop, topic, polling_interval_ms)
 
-
     def consume(self):
         msg_count = 0
         try:
@@ -48,14 +49,14 @@ class KafkaConsumer(object):
             while self.running:
                 msg = self.consumer.poll(self.polling_interval_ms)
                 if msg:
-                    if msg.error():
-                        if msg.error().code() == KafkaError._PARTITION_EOF:
+                    if msg.values():
+                        if msg.values() == KafkaError:
                             # Should be replaced by a message to be produced in error queue.
-                            sys.stderr.write \
+                            sys.stderr.write\
                                 ('%% %s [%d] end of offset %d\n' % (msg.topic(), msg.partition(), msg.offset()))
                         # It should be caught and produce a message to Kafka error queue.
                         elif msg.error():
-                            raise KafkaException(msg.error())
+                            raise Exception(msg.error())
                     else:
                         self.process(msg)
                         msg_count += 1
