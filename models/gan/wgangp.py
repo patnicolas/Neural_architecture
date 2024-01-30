@@ -127,7 +127,7 @@ class WGanGp(DCGan):
                 # Update gradients
                 critic_loss.backward(retain_graph=True)
                 # Update optimizer
-                self.disc_opt.step()
+                self.disc_opt.update_step()
             mean_critic_loss += mean_iteration_critic_loss
 
             # -------  Generator loss and gradient update -----------
@@ -143,7 +143,7 @@ class WGanGp(DCGan):
             gen_loss.backward()
 
             # Update the weights
-            self.gen_opt.step()
+            self.gen_opt.update_step()
             # Keep track of the average generator loss
             mean_gen_loss += gen_loss.item()
         return mean_gen_loss, mean_critic_loss, len(train_loader.dataset)

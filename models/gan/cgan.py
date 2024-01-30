@@ -163,7 +163,7 @@ class CGan(DCGan):
         disc_real_loss = self.hyper_params.loss_function(disc_real_pred, torch.ones_like(disc_real_pred))
         disc_loss = 0.5 * (disc_fake_loss + disc_real_loss)
         disc_loss.backward(retain_graph=True)
-        self.disc_opt.step()
+        self.disc_opt.update_step()
         return fake, disc_loss
 
 
@@ -178,6 +178,6 @@ class CGan(DCGan):
         disc_fake_pred = self.disc(fake_target_and_labels)
         gen_loss = self.hyper_params.loss_function(disc_fake_pred, torch.ones_like(disc_fake_pred))
         gen_loss.backward()
-        self.gen_opt.step()
+        self.gen_opt.update_step()
         # Keep track of the generator losses
         return gen_loss
