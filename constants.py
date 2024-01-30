@@ -19,7 +19,7 @@ relative_path = pathlib.PurePath(os.getcwd()).name
 print(f'Relative path: {relative_path}')
 
 # If the directory is a test1
-if relative_path == 'test1':
+if relative_path == 'test':
     vocab_path = '../../conf/codes/terms.txt'
     models_path = '../../models'
     input_path = '../../input_tensor'
