@@ -6,7 +6,7 @@ import math
 from scipy import stats
 
 
-class ProposedDistribution(object):
+class ProposalDistribution(object):
     from abc import abstractmethod
 
     @abstractmethod
@@ -23,10 +23,7 @@ class ProposedDistribution(object):
         pass
 
 
-
-
-
-class NormalMcMc(ProposedDistribution):
+class ProposalBeta(ProposalDistribution):
     pi_2_inv = np.sqrt(2 * np.pi)
 
     def __init__(self, alpha: int, beta: int, num_trials: int, h: int):

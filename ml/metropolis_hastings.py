@@ -2,6 +2,7 @@ __author__ = "Patrick Nicolas"
 __copyright__ = "Copyright 2020, 2024  All rights reserved."
 
 import numpy as np
+from mcmc import MCMC
 
 
 """
@@ -15,11 +16,12 @@ import numpy as np
     @author Patrick Nicolas
 """
 
-class MetropolisHastings(object):
-    from ml.proposeddistribution import ProposedDistribution
+
+class MetropolisHastings(MCMC):
+    from ml.proposal_distribution import ProposalDistribution
 
     def __init__(self,
-                 proposed_distribution: ProposedDistribution,
+                 proposed_distribution: ProposalDistribution,
                  num_iterations: int,
                  burn_in_ratio: float,
                  sigma_delta: float = 0.2):
@@ -54,8 +56,8 @@ class MetropolisHastings(object):
                 # We only consider positive and non-null prior probabilities
                 if cur_prior > 0.0 and new_prior > 0.0:
                     # We use the logarithm value for the comparison to avoid underflow
-                    cur_log_posterior = self.__posterior(theta, cur_prior)
-                    new_log_posterior = self.__posterior(theta_star, new_prior)
+                    cur_log_posterior = self.proposed_distribution.posterior(theta, cur_prior)
+                    new_log_posterior = self.proposed_distribution.posterior(theta_star, new_prior)
 
                     # Apply the selection criteria
                     if MetropolisHastings.__acceptance_rule(cur_log_posterior, new_log_posterior):
@@ -75,8 +77,8 @@ class MetropolisHastings(object):
 
         # --------------  Supporting methods -----------------------
 
-    def __posterior(self, theta: float, prior: float) -> float:
-        return  self.proposed_distribution.log_likelihood(theta) + np.log(prior)
+  #  def __posterior(self, theta: float, prior: float) -> float:
+  #      return  self.proposed_distribution.log_likelihood(theta) + np.log(prior)
 
     @staticmethod
     def __acceptance_rule(current: float, new: float) -> bool:

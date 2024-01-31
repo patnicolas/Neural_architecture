@@ -2,7 +2,7 @@ from unittest import TestCase
 import numpy as np
 from util.plottermixin import PlotterParameters, PlotterMixin
 from ml.metropolis_hastings import MetropolisHastings
-from ml.proposeddistribution import NormalMcMc, ProposedDistribution
+from ml.proposal_distribution import ProposalBeta, ProposalDistribution
 from typing import AnyStr
 from scipy import stats
 
@@ -31,7 +31,7 @@ class TestMetropolisHastings(TestCase):
         beta = 10
         num_trails = 96
         h = 10
-        normal_McMc = NormalMcMc(alpha, beta, num_trails, h)
+        normal_McMc = ProposalBeta(alpha, beta, num_trails, h)
         TestMetropolisHastings.execute_metropolis_hastings(
             normal_McMc,
             num_iterations,
@@ -51,7 +51,7 @@ class TestMetropolisHastings(TestCase):
         beta = 10
         num_trails = 96
         h = 10
-        normal_McMc = NormalMcMc(alpha, beta, num_trails, h)
+        normal_McMc = ProposalBeta(alpha, beta, num_trails, h)
 
         TestMetropolisHastings.execute_metropolis_hastings(
             normal_McMc,
@@ -72,7 +72,7 @@ class TestMetropolisHastings(TestCase):
         beta = 2
         num_trails = 96
         h = 10
-        normal_McMc = NormalMcMc(alpha, beta, num_trails, h)
+        normal_McMc = ProposalBeta(alpha, beta, num_trails, h)
 
         TestMetropolisHastings.execute_metropolis_hastings(
             normal_McMc,
@@ -85,7 +85,7 @@ class TestMetropolisHastings(TestCase):
 
     @staticmethod
     def execute_metropolis_hastings(
-            proposed_distribution: ProposedDistribution,
+            proposed_distribution: ProposalDistribution,
             num_iterations: int,
             burn_in_ratio: float,
             sigma_delta: float,
